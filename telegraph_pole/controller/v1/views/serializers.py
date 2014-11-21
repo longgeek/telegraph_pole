@@ -1,6 +1,6 @@
-from telegraph_pole.apphome.models import Host
-from telegraph_pole.apphome.models import Image
-from telegraph_pole.apphome.models import Container
+from apphome.models import Host
+from apphome.models import Image
+from apphome.models import Container
 from rest_framework import serializers
 
 

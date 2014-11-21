@@ -4,7 +4,7 @@
 
 from django.http import Http404
 
-from telegraph_pole.apphome.models import Container
+from apphome.models import Container
 
 from serializers import ContainerSerializer
 

@@ -1,0 +1,4 @@
+django>=1.7.0
+djangorestframework
+django-rest-swagger
+pbr>=0.6,!=0.7,<1.0
