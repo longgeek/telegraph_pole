@@ -17,17 +17,17 @@ urlpatterns = patterns(
     url(r'^$',
         views.HostView.as_view()),
 
-    url(r'^create$',
-        views.HostCreateView.as_view()),
+    # url(r'^create$',
+    #     views.HostCreateView.as_view()),
 
     url(r'^(?P<pk>[0-9]+)$',
         views.HostDetailView.as_view()),
 
-    url(r'^(?P<pk>[0-9]+)/update$',
-        views.HostUpdateView.as_view()),
+    # url(r'^(?P<pk>[0-9]+)/update$',
+    #     views.HostUpdateView.as_view()),
 
-    url(r'^(?P<pk>[0-9]+)/delete$',
-        views.HostDeleteView.as_view()),
+    # url(r'^(?P<pk>[0-9]+)/delete$',
+    #     views.HostDeleteView.as_view()),
 )
 
 # urlpatterns = format_suffix_patterns(urlpatterns)

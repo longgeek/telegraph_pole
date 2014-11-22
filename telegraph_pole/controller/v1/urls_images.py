@@ -12,15 +12,15 @@ urlpatterns = patterns(
     url(r'^$',
         views.ImageView.as_view()),
 
-    url(r'^create$',
-        views.ImageCreateView.as_view()),
+    # url(r'^create$',
+    #     views.ImageCreateView.as_view()),
 
     url(r'^(?P<pk>[0-9]+)$',
         views.ImageDetailView.as_view()),
 
-    url(r'^(?P<pk>[0-9]+)/update$',
-        views.ImageUpdateView.as_view()),
+    # url(r'^(?P<pk>[0-9]+)/update$',
+    #     views.ImageUpdateView.as_view()),
 
-    url(r'^(?P<pk>[0-9]+)/delete$',
-        views.ImageDeleteView.as_view()),
+    # url(r'^(?P<pk>[0-9]+)/delete$',
+    #     views.ImageDeleteView.as_view()),
 )

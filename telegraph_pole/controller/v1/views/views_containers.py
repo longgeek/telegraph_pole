@@ -11,6 +11,7 @@ from serializers import ContainerSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from telegraph_pole.lib.mq import send
 
 
 class ContainerView(APIView):
@@ -74,7 +75,7 @@ class ContainerCreateView(APIView):
     def post(self, request, format=None):
         serializer = ContainerSerializer(data=request.DATA)
         if serializer.is_valid():
-            serializer.save()
+            send('create_container', serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,14 +95,14 @@ class ContainerUpdateView(APIView):
         user_id command created hostname flavor_id
     """
 
-    def get_object(self, pk):
+    def get_object(self, cid):
         try:
-            return Container.objects.get(pk=pk)
+            return Container.objects.get(cid=cid)
         except Container.DoesNotExist:
             raise Http404
 
-    def put(self, request, pk, format=None):
-        container = self.get_object(pk)
+    def put(self, request, cid, format=None):
+        container = self.get_object(cid)
         serializer = ContainerSerializer(container, data=request.DATA)
         if serializer.is_valid():
             serializer.save()
@@ -120,15 +121,15 @@ class ContainerDeleteView(APIView):
         DELETE /containers/390e90e34656806/delete HTTP/1.1
     """
 
-    def get_object(self, pk):
+    def get_object(self, cid):
         try:
-            return Container.objects.get(pk=pk)
+            return Container.objects.get(cid=cid)
         except Container.DoesNotExist:
             raise Http404
 
-    def delete(self, request, pk, format=None):
-        container = self.get_object(pk)
-        container.delete()
+    def delete(self, request, cid, format=None):
+        container = self.get_object(cid)
+        send('delete_container', container)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -143,14 +144,14 @@ class ContainerDetailView(APIView):
         GET /containers/390e90e34656806 HTTP/1.1
     """
 
-    def get_object(self, pk):
+    def get_object(self, cid):
         try:
-            return Container.objects.get(pk=pk)
+            return Container.objects.get(cid=cid)
         except Container.DoesNotExist:
             raise Http404
 
-    def get(self, request, pk, format=None):
-        container = self.get_object(pk)
+    def get(self, request, cid, format=None):
+        container = self.get_object(cid)
         serializer = ContainerSerializer(container)
         return Response(serializer.data)
 
@@ -169,9 +170,9 @@ class ContainerStopView(APIView):
         t – number of seconds to wait before killing the container
     """
 
-    def post(self, request, pk, format=None):
-        serializer = ContainerSerializer(data=request.DATA)
-        return Response(serializer.data, status=status.HTTP_304_NOT_MODIFIED)
+    def post(self, request, cid, format=None):
+        send('stop_container', cid)
+        return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
 class ContainerStartView(APIView):
@@ -185,9 +186,9 @@ class ContainerStartView(APIView):
         POST /containers/e90e34656806/start HTTP/1.1
     """
 
-    def post(self, request, pk, format=None):
-        serializer = ContainerSerializer(data=request.DATA)
-        return Response(serializer.data, status=status.HTTP_304_NOT_MODIFIED)
+    def post(self, request, cid, format=None):
+        send('start_container', cid)
+        return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
 class ContainerReStartView(APIView):
@@ -201,6 +202,6 @@ class ContainerReStartView(APIView):
         POST /containers/e90e34656806/restart HTTP/1.1
     """
 
-    def post(self, request, pk, format=None):
-        serializer = ContainerSerializer(data=request.DATA)
-        return Response(serializer.data, status=status.HTTP_304_NOT_MODIFIED)
+    def post(self, request, cid, format=None):
+        send('restart_container', cid)
+        return Response(status=status.HTTP_304_NOT_MODIFIED)
