@@ -10,5 +10,7 @@ from views import views_flavors as views
 urlpatterns = patterns(
     '',
     url(r'^$',
-        views.HostView.as_view()),
+        views.FlavorView.as_view()),
+    url(r'^(?P<id>[0-9]+)$',
+        views.FlavorDetailView.as_view()),
 )
