@@ -17,8 +17,8 @@ urlpatterns = patterns(
     url(r'^$',
         views.HostView.as_view()),
 
-    # url(r'^create$',
-    #     views.HostCreateView.as_view()),
+    url(r'^create$',
+        views.HostCreateView.as_view()),
 
     url(r'^(?P<pk>[0-9]+)$',
         views.HostDetailView.as_view()),

@@ -4,10 +4,11 @@ from apphome.models import Container
 from rest_framework import serializers
 
 
-class ImageSerializer(serializers.HyperlinkedModelSerializer):
+class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('iid',
+        fields = ('id',
+                  'iid',
                   'tag',
                   'created',
                   'os_type',
@@ -16,10 +17,11 @@ class ImageSerializer(serializers.HyperlinkedModelSerializer):
                   'virtual_size',)
 
 
-class HostSerializer(serializers.HyperlinkedModelSerializer):
+class HostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Host
-        fields = ('ip',
+        fields = ('id',
+                  'ip',
                   'port',
                   'image',
                   'status',
@@ -30,10 +32,11 @@ class HostSerializer(serializers.HyperlinkedModelSerializer):
                   'total_bandwidth',)
 
 
-class ContainerSerializer(serializers.HyperlinkedModelSerializer):
+class ContainerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Container
-        fields = ('cid',
+        fields = ('id',
+                  'cid',
                   'size',
                   'host',
                   'name',

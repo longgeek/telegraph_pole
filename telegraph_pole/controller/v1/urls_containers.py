@@ -15,22 +15,22 @@ urlpatterns = patterns(
     url(r'^create$',
         views.ContainerCreateView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/$',
+    url(r'^(?P<id>[0-9]+)/$',
         views.ContainerDetailView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/update$',
+    url(r'^(?P<id>[0-9]+)/update$',
         views.ContainerUpdateView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/delete$',
+    url(r'^(?P<id>[0-9]+)/delete$',
         views.ContainerDeleteView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/stop$',
+    url(r'^(?P<id>[0-9]+)/stop$',
         views.ContainerStopView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/start$',
+    url(r'^(?P<id>[0-9]+)/start$',
         views.ContainerStartView.as_view()),
 
-    url(r'^(?P<cid>[0-9]+)/restart$',
+    url(r'^(?P<id>[0-9]+)/restart$',
         views.ContainerReStartView.as_view()),
 
 )

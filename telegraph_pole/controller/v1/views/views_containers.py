@@ -84,7 +84,7 @@ class ContainerUpdateView(APIView):
     """更新一个容器
 
     Info:
-        PUT /containers/(cid)/update HTTP/1.1
+        PUT /containers/(id)/update HTTP/1.1
         Content-Type: application/json
 
     Example request:
@@ -95,14 +95,14 @@ class ContainerUpdateView(APIView):
         user_id command created hostname flavor_id
     """
 
-    def get_object(self, cid):
+    def get_object(self, id):
         try:
-            return Container.objects.get(cid=cid)
+            return Container.objects.get(id=id)
         except Container.DoesNotExist:
             raise Http404
 
-    def put(self, request, cid, format=None):
-        container = self.get_object(cid)
+    def put(self, request, id, format=None):
+        container = self.get_object(id)
         serializer = ContainerSerializer(container, data=request.DATA)
         if serializer.is_valid():
             serializer.save()
@@ -114,21 +114,21 @@ class ContainerDeleteView(APIView):
     """删除一个容器
 
     Info:
-        DELETE /containers/(cid)/delete HTTP/1.1
+        DELETE /containers/(id)/delete HTTP/1.1
         Content-Type: application/json
 
     Example request:
         DELETE /containers/390e90e34656806/delete HTTP/1.1
     """
 
-    def get_object(self, cid):
+    def get_object(self, id):
         try:
-            return Container.objects.get(cid=cid)
+            return Container.objects.get(id=id)
         except Container.DoesNotExist:
             raise Http404
 
-    def delete(self, request, cid, format=None):
-        container = self.get_object(cid)
+    def delete(self, request, id, format=None):
+        container = self.get_object(id)
         send('delete_container', container)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -137,21 +137,21 @@ class ContainerDetailView(APIView):
     """根据容器 id 获取数据库中容器信息
 
     Info:
-        GET /containers/(cid)/ HTTP/1.1
+        GET /containers/(id)/ HTTP/1.1
         Content-Type: application/json
 
     Example request:
         GET /containers/390e90e34656806 HTTP/1.1
     """
 
-    def get_object(self, cid):
+    def get_object(self, id):
         try:
-            return Container.objects.get(cid=cid)
+            return Container.objects.get(id=id)
         except Container.DoesNotExist:
             raise Http404
 
-    def get(self, request, cid, format=None):
-        container = self.get_object(cid)
+    def get(self, request, id, format=None):
+        container = self.get_object(id)
         serializer = ContainerSerializer(container)
         return Response(serializer.data)
 
@@ -160,7 +160,7 @@ class ContainerStopView(APIView):
     """停止一个容器
 
     Info:
-        POST /containers/(cid)/stop HTTP/1.1
+        POST /containers/(id)/stop HTTP/1.1
         Content-Type: application/json
 
     Example request:
@@ -170,8 +170,8 @@ class ContainerStopView(APIView):
         t – number of seconds to wait before killing the container
     """
 
-    def post(self, request, cid, format=None):
-        send('stop_container', cid)
+    def post(self, request, id, format=None):
+        send('stop_container', id)
         return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
@@ -179,15 +179,15 @@ class ContainerStartView(APIView):
     """启动一个容器
 
     Info:
-        POST /containers/(cid)/start HTTP/1.1
+        POST /containers/(id)/start HTTP/1.1
         Content-Type: application/json
 
     Example request:
         POST /containers/e90e34656806/start HTTP/1.1
     """
 
-    def post(self, request, cid, format=None):
-        send('start_container', cid)
+    def post(self, request, id, format=None):
+        send('start_container', id)
         return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
@@ -195,13 +195,13 @@ class ContainerReStartView(APIView):
     """重启一个容器
 
     Info:
-        POST /containers/(cid)/restart HTTP/1.1
+        POST /containers/(id)/restart HTTP/1.1
         Content-Type: application/json
 
     Example request:
         POST /containers/e90e34656806/restart HTTP/1.1
     """
 
-    def post(self, request, cid, format=None):
-        send('restart_container', cid)
+    def post(self, request, id, format=None):
+        send('restart_container', id)
         return Response(status=status.HTTP_304_NOT_MODIFIED)
