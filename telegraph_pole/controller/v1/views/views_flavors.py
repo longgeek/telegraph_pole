@@ -10,7 +10,7 @@ from rest_framework import response
 
 
 class FlavorView(APIView):
-    """列出所有镜像
+    """列出所有 Flavor
 
     Info:
         GET /flavors/ HTTP/1.1
@@ -35,7 +35,7 @@ class FlavorView(APIView):
 
 
 class FlavorDetailView(APIView):
-    """根据 id 获取镜像
+    """根据 id 获取 Flavor
 
     Info:
         GET /flavors/(id)/ HTTP/1.1
