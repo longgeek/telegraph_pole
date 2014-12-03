@@ -11,7 +11,7 @@ from serializers import ContainerSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from telegraph_pole.lib.mq import send
+from telegraph_pole.lib.mq import send_message
 
 
 class ContainerView(APIView):
@@ -75,7 +75,8 @@ class ContainerCreateView(APIView):
     def post(self, request, format=None):
         serializer = ContainerSerializer(data=request.DATA)
         if serializer.is_valid():
-            send('create_container', serializer.data)
+            serializer.data['message_type'] = 'create_container'
+            send_message(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -129,7 +130,8 @@ class ContainerDeleteView(APIView):
 
     def delete(self, request, id, format=None):
         container = self.get_object(id)
-        send('delete_container', container)
+        container['message_type'] = 'delete_container'
+        send_message(container)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -171,7 +173,8 @@ class ContainerStopView(APIView):
     """
 
     def post(self, request, id, format=None):
-        send('stop_container', id)
+        message = {'id': id, 'message_type': 'stop_container'}
+        send_message(message)
         return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
@@ -187,7 +190,8 @@ class ContainerStartView(APIView):
     """
 
     def post(self, request, id, format=None):
-        send('start_container', id)
+        message = {'id': id, 'message_type': 'start_container'}
+        send_message(message)
         return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
@@ -203,5 +207,6 @@ class ContainerReStartView(APIView):
     """
 
     def post(self, request, id, format=None):
-        send('restart_container', id)
+        message = {'id': id, 'message_type': 'restart_container'}
+        send_message(message)
         return Response(status=status.HTTP_304_NOT_MODIFIED)

@@ -65,7 +65,7 @@ DATABASES = {
         'NAME': 'telegraph_pole',
         'HOST': '127.0.0.1',
         'USER': 'root',
-        'PASS': '',
+        'PASSWORD': '',
     }
 }
 
@@ -98,7 +98,7 @@ REST_FRAMEWORK = {
 
 # RabbitMQ Server Setup
 
-RABBITMQ_HOST = '127.0.0.1'
+RABBITMQ_HOST = '192.168.8.8'
 RABBITMQ_PORT = '5672'
 RABBITMQ_USER = 'guest'
 RABBITMQ_PASS = 'guest'
