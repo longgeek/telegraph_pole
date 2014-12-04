@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 # Author: Longgeek <longgeek@gmail.com>
 
+import simplejson
+
 from django.http import Http404
 
 from apphome.models import Container
@@ -89,7 +91,7 @@ class ContainerUpdateView(APIView):
         Content-Type: application/json
 
     Example request:
-        PUT /containers/390e90e34656806/update HTTP/1.1
+        PUT /containers/3/update HTTP/1.1
 
     Jons Parameters:
         cid name host size ports image status
@@ -119,19 +121,12 @@ class ContainerDeleteView(APIView):
         Content-Type: application/json
 
     Example request:
-        DELETE /containers/390e90e34656806/delete HTTP/1.1
+        DELETE /containers/3/delete HTTP/1.1
     """
 
-    def get_object(self, id):
-        try:
-            return Container.objects.get(id=id)
-        except Container.DoesNotExist:
-            raise Http404
-
     def delete(self, request, id, format=None):
-        container = self.get_object(id)
-        container['message_type'] = 'delete_container'
-        send_message(container)
+        msg = {'id': id, 'message_type': 'delete_container'}
+        send_message(msg)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -143,7 +138,7 @@ class ContainerDetailView(APIView):
         Content-Type: application/json
 
     Example request:
-        GET /containers/390e90e34656806 HTTP/1.1
+        GET /containers/3 HTTP/1.1
     """
 
     def get_object(self, id):
@@ -166,7 +161,7 @@ class ContainerStopView(APIView):
         Content-Type: application/json
 
     Example request:
-        POST /containers/e90e34656806/stop?t=5 HTTP/1.1
+        POST /containers/3/stop?t=5 HTTP/1.1
 
     Query Parameters:
         t – number of seconds to wait before killing the container
@@ -186,7 +181,7 @@ class ContainerStartView(APIView):
         Content-Type: application/json
 
     Example request:
-        POST /containers/e90e34656806/start HTTP/1.1
+        POST /containers/3/start HTTP/1.1
     """
 
     def post(self, request, id, format=None):
@@ -203,7 +198,7 @@ class ContainerReStartView(APIView):
         Content-Type: application/json
 
     Example request:
-        POST /containers/e90e34656806/restart HTTP/1.1
+        POST /containers/3/restart HTTP/1.1
     """
 
     def post(self, request, id, format=None):
