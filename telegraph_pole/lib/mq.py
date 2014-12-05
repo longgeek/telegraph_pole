@@ -78,9 +78,12 @@ class Call(object):
         # 接收返回的数据
         while self.response[corr_id] is None:
             self.connection.process_data_events()
+        # 返回接收到的数据
+        return self.response[corr_id]
 
 
 def send_message(message):
     """发送消息"""
     call = Call()
-    call.request(simplejson.dumps(message))
+    # 返回消息处理结果
+    return call.request(simplejson.dumps(message))
