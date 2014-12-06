@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # Author: Longgeek <longgeek@gmail.com>
 
-import simplejson
-
 from django.http import Http404
 
 from apphome.models import Container
@@ -414,7 +412,7 @@ class ContainerExecView(APIView):
                 s, m, r = send_message(msg)
                 if s == 0:
                     detail = {'detail': 'Container %s command \
-                                         executed successfully' % r['cid']}
+executed successfully' % r['cid']}
                     return Response(detail, status=status.HTTP_200_OK)
                 else:
                     detail = {'detail': m}
