@@ -33,10 +33,33 @@ class ContainerView(APIView):
         user_id command created hostname flavor_id
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        404 - no such container
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        404 - Failure, no such container
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            [
+                {
+                    "id": 14,
+                    "cid": "390e90e34656806578a5a86bd12d5f1abc
+                            59b58b8be2b65bcf48a410e5536b9b",
+                    "size": "0",
+                    "host": 1,
+                    "name": "/determined_lalande",
+                    "image": 1,
+                    "ports": "",
+                    "status": "Up 36 minutes",
+                    "user_id": "2",
+                    "command": "/bin/bash",
+                    "created": "1417874473",
+                    "hostname": "bda51967884c",
+                    "flavor_id": "1"
+                }
+            ]
+        Failure:
+            {"detail": STRING}
     """
 
     def get(self, request, format=None):
@@ -75,21 +98,43 @@ class ContainerCreateView(APIView):
         user_id command created hostname flavor_id
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        404 - no such container
-        500 - server error
+        201 - Success, no error, created
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": 14,
+                "cid": "bda51967884c70b578a5a86bd12d5f1abc59b5
+                        8b8be2b65bcf48a410e5536b9b",
+                "size": "0",
+                "host": 1,
+                "name": "/determined_lalande",
+                "image": 1,
+                "ports": "",
+                "status": "Up 41 minutes",
+                "user_id": "2",
+                "command": "/bin/bash",
+                "created": "1417874473",
+                "hostname": "bda51967884c",
+                "flavor_id": "1"
+            }
+
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, format=None):
         serializer = ContainerSerializer(data=request.DATA)
         if serializer.is_valid():
             serializer.data['message_type'] = 'create_container'
-            msg_result = simplejson.loads(send_message(serializer.data))
-            if msg_result[0] == 0:
-                return Response(msg_result[2], status=status.HTTP_200_OK)
+            s, m, r = send_message(serializer.data)
+            if s == 0:
+                return Response(r, status=status.HTTP_201_CREATED)
             else:
-                return Response(msg_result[1],
+                detail = {'detail': m}
+                return Response(detail,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors,
@@ -111,9 +156,9 @@ class ContainerUpdateView(APIView):
         user_id command created hostname flavor_id
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
     """
 
     def get_object(self, id):
@@ -142,34 +187,63 @@ class ContainerDeleteView(APIView):
         DELETE /containers/3/delete HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def delete(self, request, id, format=None):
         msg = {'id': id, 'message_type': 'delete_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s has been deleted.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerDetailView(APIView):
     """根据容器 id 获取数据库中容器信息
 
     Info:
-        GET /containers/(id)/ HTTP/1.1
+        GET /containers/(id) HTTP/1.1
         Content-Type: application/json
 
     Example request:
         GET /containers/3 HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": 14,
+                "cid": "bda51967884c70b578a5a86bd12d5f1abc59b
+                        58b8be2b65bcf48a410e5536b9b",
+                "size": "0",
+                "host": 1,
+                "name": "/determined_lalande",
+                "image": 1,
+                "ports": "",
+                "status": "Up 6 minutes",
+                "user_id": "2",
+                "command": "/bin/bash",
+                "created": "1417874473",
+                "hostname": "bda51967884c",
+                "flavor_id": "1"
+            }
+        Failure:
+            {"detail": STRING}
     """
 
     def get_object(self, id):
@@ -198,9 +272,15 @@ class ContainerStopView(APIView):
         t – number of seconds to wait before killing the container
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, id, format=None):
@@ -208,11 +288,13 @@ class ContainerStopView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
         msg = {'id': id, 'message_type': 'stop_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s stop success.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerStartView(APIView):
@@ -226,9 +308,15 @@ class ContainerStartView(APIView):
         POST /containers/3/start HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, id, format=None):
@@ -236,11 +324,13 @@ class ContainerStartView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
         msg = {'id': id, 'message_type': 'start_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s startup success.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerReStartView(APIView):
@@ -254,9 +344,15 @@ class ContainerReStartView(APIView):
         POST /containers/3/restart HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, id, format=None):
@@ -264,27 +360,29 @@ class ContainerReStartView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
         msg = {'id': id, 'message_type': 'restart_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s restart success.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerExecView(APIView):
     """在容器中启动一个进程
 
     Info:
-        POST /containers/exec HTTP/1.1
+        POST /containers/(id)/exec HTTP/1.1
         Content-Type: application/json
 
     Example request:
-        POST /containers/exec HTTP/1.1
+        POST /containers/3/exec HTTP/1.1
 
         {
-         "id": "2",
          "command":[
-                     "date"
+                     "date",
+                     "date -s"
              ],
         }
 
@@ -293,32 +391,42 @@ class ContainerExecView(APIView):
         command: list
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
-    def post(self, request, format=None):
+    def post(self, request, id, format=None):
         param = request.POST
 
         # 判断 post 的参数是否有 'id' ‘command'
         # 并且 value 不能为空
-        if len(param) == 2 and 'id' in param.keys() and \
-                               'command' in param.keys():
-            if param['id'] and param['command']:
-                msg = {'id': param['id'], 'command': param['command'],
+        if len(param) == 1 and 'command' in param.keys():
+            if param['command']:
+                msg = {'id': id, 'command': param['command'],
                        'message_type': 'exec_container'}
-                msg_result = simplejson.loads(send_message(msg))
-                if msg_result[0] == 0:
-                    return Response(msg_result[2], status=status.HTTP_200_OK)
+                s, m, r = send_message(msg)
+                if s == 0:
+                    detail = {'detail': 'Container %s command \
+                                         executed successfully' % r['cid']}
+                    return Response(detail, status=status.HTTP_200_OK)
                 else:
-                    return Response(msg_result[1],
+                    detail = {'detail': m}
+                    return Response(detail,
                                     status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response('Error: The wrong parameter!',
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response('Error: The wrong parameter!',
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -333,9 +441,15 @@ class ContainerPauseView(APIView):
         POST /containers/3/pause HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, id, format=None):
@@ -343,11 +457,13 @@ class ContainerPauseView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
         msg = {'id': id, 'message_type': 'pause_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s suspend success.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerUnPauseView(APIView):
@@ -361,9 +477,15 @@ class ContainerUnPauseView(APIView):
         POST /containers/3/unpause HTTP/1.1
 
     Status Codes:
-        200 - no error
-        400 - bad request
-        500 - server error
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {"detail": STRING}
+        Failure:
+            {"detail": STRING}
     """
 
     def post(self, request, id, format=None):
@@ -371,8 +493,68 @@ class ContainerUnPauseView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
         msg = {'id': id, 'message_type': 'unpause_container'}
-        msg_result = simplejson.loads(send_message(msg))
-        if msg_result[0] == 0:
-            return Response(msg_result[2], status=status.HTTP_200_OK)
+        s, m, r = send_message(msg)
+        if s == 0:
+            detail = {'detail': 'Container %s unpause success.' % r['cid']}
+            return Response(detail, status=status.HTTP_200_OK)
         else:
-            return Response(msg_result[1], status=status.HTTP_400_BAD_REQUEST)
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerTopView(APIView):
+    """列出容器中的所有进程
+
+    Info:
+        POST /containers/(id)/top HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/top HTTP/1.1
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+        {
+             "cid": "bda51967884c70b578a5a86bd12d5f1abc59b58b
+                     8be2b65bcf48a410e5536b9b",
+             "titles":[
+                     "USER",
+                     "PID",
+                     "%CPU",
+                     "%MEM",
+                     "VSZ",
+                     "RSS",
+                     "TTY",
+                     "STAT",
+                     "START",
+                     "TIME",
+                     "COMMAND"
+                     ],
+             "processes":[
+                     ["root","20147","0.0","0.1","18060",
+                      "1864","pts/4","S","10:06","0:00","bash"],
+                     ["root","20271","0.0","0.0","4312",
+                      "352","pts/4","S+","10:07","0:00","sleep","10"]
+             ]
+        }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def get(self, request, id, format=None):
+        msg = {'id': id, 'message_type': 'top_container'}
+        s, m, r = send_message(msg)
+        if s == 0:
+            r.pop('id')
+            r.pop('host')
+            r.pop('port')
+            r.pop('message_type')
+            return Response(r, status=status.HTTP_200_OK)
+        else:
+            detail = {'detail': m}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)

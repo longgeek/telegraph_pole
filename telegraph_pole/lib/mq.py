@@ -86,4 +86,5 @@ def send_message(message):
     """发送消息"""
     call = Call()
     # 返回消息处理结果
-    return call.request(simplejson.dumps(message))
+    res = simplejson.loads(call.request(simplejson.dumps(message)))
+    return (res[0], res[1], res[2])

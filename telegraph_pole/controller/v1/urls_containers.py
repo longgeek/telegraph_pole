@@ -33,7 +33,7 @@ urlpatterns = patterns(
     url(r'^(?P<id>[0-9]+)/restart$',
         views.ContainerReStartView.as_view()),
 
-    url(r'^exec$',
+    url(r'^(?P<id>[0-9]+)/exec$',
         views.ContainerExecView.as_view()),
 
     url(r'^(?P<id>[0-9]+)/pause$',
@@ -41,4 +41,7 @@ urlpatterns = patterns(
 
     url(r'^(?P<id>[0-9]+)/unpause$',
         views.ContainerUnPauseView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/top$',
+        views.ContainerTopView.as_view()),
 )
