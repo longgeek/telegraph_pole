@@ -576,6 +576,7 @@ class ContainerConsoleView(APIView):
 
     Jons Parameters:
         command: list
+        username: str
 
     Status Codes:
         200 - Success, no error
@@ -589,6 +590,7 @@ class ContainerConsoleView(APIView):
                 "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
                         b51b3cd139fc050860f362def2ed",
                 "host": "192.168.8.8",
+                "username": 'longgeek',
                 "console": {
                     "/bin/bash": {
                         "private_port": 4301,
@@ -603,11 +605,14 @@ class ContainerConsoleView(APIView):
     def post(self, request, id, format=None):
         param = request.DATA
 
-        # 判断 post 的参数是否有 'command'
+        # 判断 post 的参数是否有 'command' ’username'
         # 并且 value 不能为空
-        if len(param) == 1 and 'command' in param.keys():
-            if param['command']:
-                msg = {'id': id, 'command': param['command'],
+        if len(param) == 2 and 'command' in param.keys() and \
+                               'username' in param.keys():
+            if param['command'] and param['username']:
+                msg = {'id': id,
+                       'command': param['command'],
+                       'username': param['username'],
                        'message_type': 'console_container'}
                 s, m, r = send_message(msg)
                 if s == 0:
