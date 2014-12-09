@@ -44,4 +44,7 @@ urlpatterns = patterns(
 
     url(r'^(?P<id>[0-9]+)/top$',
         views.ContainerTopView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/console$',
+        views.ContainerConsoleView.as_view()),
 )

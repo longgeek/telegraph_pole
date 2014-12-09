@@ -385,7 +385,6 @@ class ContainerExecView(APIView):
         }
 
     Jons Parameters:
-        id: str
         command: list
 
     Status Codes:
@@ -401,9 +400,9 @@ class ContainerExecView(APIView):
     """
 
     def post(self, request, id, format=None):
-        param = request.POST
+        param = request.DATA
 
-        # 判断 post 的参数是否有 'id' ‘command'
+        # 判断 post 的参数是否有 'command'
         # 并且 value 不能为空
         if len(param) == 1 and 'command' in param.keys():
             if param['command']:
@@ -556,3 +555,72 @@ class ContainerTopView(APIView):
         else:
             detail = {'detail': m}
             return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerConsoleView(APIView):
+    """容器启动 bash ipython vim Console.
+
+    Info:
+        POST /containers/(id)/console HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/console HTTP/1.1
+
+        {
+         "command":[
+                     "/bin/bash",
+                     "vim /path/urls.py",
+             ],
+        }
+
+    Jons Parameters:
+        command: list
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": "10",
+                "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
+                        b51b3cd139fc050860f362def2ed",
+                "host": "192.168.8.8",
+                "console": {
+                    "/bin/bash": {
+                        "private_port": 4301,
+                        "public_port": 49187
+                    }
+                },
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'command'
+        # 并且 value 不能为空
+        if len(param) == 1 and 'command' in param.keys():
+            if param['command']:
+                msg = {'id': id, 'command': param['command'],
+                       'message_type': 'console_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r, status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
