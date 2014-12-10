@@ -12,40 +12,53 @@ from telegraph_pole.settings import RABBITMQ_USER
 from telegraph_pole.settings import RABBITMQ_PASS
 
 
-class SingLeton(object):
-    """ 单例类，只初始化一次
-
-    获取 RabbitMQ 连接对象.
-    """
-
-    _instance = None
-    conn = None
-    channel = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(SingLeton, cls).__new__(
-                cls, *args, **kwargs)
-
-            # Initialize RabbitMQ connection
-            credentials = pika.PlainCredentials(RABBITMQ_USER,
-                                                RABBITMQ_PASS)
-            cls.conn = pika.BlockingConnection(pika.ConnectionParameters(
-                host=RABBITMQ_HOST,
-                port=int(RABBITMQ_PORT),
-                credentials=credentials))
-            cls.channel = cls.conn.channel()
-
-        return (cls.channel, cls.conn)
+# class SingLeton(object):
+#     """ 单例类，只初始化一次
+#
+#     获取 RabbitMQ 连接对象.
+#     """
+#
+#     _instance = None
+#     conn = None
+#     channel = None
+#
+#     def __new__(cls, *args, **kwargs):
+#         if not cls._instance:
+#             cls._instance = super(SingLeton, cls).__new__(
+#                 cls, *args, **kwargs)
+#
+#             # Initialize RabbitMQ connection
+#             credentials = pika.PlainCredentials(RABBITMQ_USER,
+#                                                 RABBITMQ_PASS)
+#             cls.conn = pika.BlockingConnection(pika.ConnectionParameters(
+#                 host=RABBITMQ_HOST,
+#                 port=int(RABBITMQ_PORT),
+#                 credentials=credentials))
+#             cls.channel = cls.conn.channel()
+#
+#         return (cls.channel, cls.conn)
+#
+#     def __del__(self):
+#         del self._instance
+#         del self.conn
+#         del self.channel
 
 
 class Call(object):
     """发送消息同时等待远程返回值"""
 
     def __init__(self):
-        sing_leton = SingLeton()
-        self.channel = sing_leton[0]
-        self.connection = sing_leton[1]
+        # Initialize RabbitMQ connection
+        credentials = pika.PlainCredentials(RABBITMQ_USER,
+                                            RABBITMQ_PASS)
+        self.conn = pika.BlockingConnection(pika.ConnectionParameters(
+            host=RABBITMQ_HOST,
+            port=int(RABBITMQ_PORT),
+            credentials=credentials))
+        self.channel = self.conn.channel()
+        # sing_leton = SingLeton()
+        # self.channel = sing_leton[0]
+        # self.connection = sing_leton[1]
 
         # 定义接收返回消息的队列(随机)
         result = self.channel.queue_declare(exclusive=True)
@@ -77,7 +90,7 @@ class Call(object):
 
         # 接收返回的数据
         while self.response[corr_id] is None:
-            self.connection.process_data_events()
+            self.conn.process_data_events()
         # 返回接收到的数据
         return self.response[corr_id]
 
