@@ -8,9 +8,9 @@ class Image(models.Model):
         ('centos', 'Centos'),
     )
     iid = models.CharField(max_length=80)
-    tag = models.CharField(max_length=20)
+    tag = models.CharField(max_length=40)
     created = models.CharField(max_length=40)
-    repository = models.CharField(max_length=20)
+    repository = models.CharField(max_length=40)
     virtual_size = models.CharField(max_length=20)
     os_type = models.CharField(max_length=25, choices=OS_TYPES,
                                null=True, blank=True)
@@ -76,6 +76,7 @@ class Container(models.Model):
     ports = models.CharField(max_length=200, null=True, blank=True)
     hostname = models.CharField(max_length=80, null=True, blank=True)
     create_status = models.BooleanField(_("Create_Status"), default=False)
+    json_extra = models.TextField()
 
     class Meta:
         app_label = "apphome"
