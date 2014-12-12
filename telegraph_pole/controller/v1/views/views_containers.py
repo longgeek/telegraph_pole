@@ -28,7 +28,7 @@ class ContainerView(APIView):
     Query Parameters:
 
         cid name host size ports image status
-        user_id command created hostname flavor_id
+        user_id command created hostname flavor_id json_extra
 
     Status Codes:
         200 - Success, no error
@@ -53,7 +53,8 @@ class ContainerView(APIView):
                     "command": "/bin/bash",
                     "created": "1417874473",
                     "hostname": "bda51967884c",
-                    "flavor_id": "1"
+                    "flavor_id": "1",
+                    "json_extra": "",
                 }
             ]
         Failure:
@@ -93,7 +94,7 @@ class ContainerCreateView(APIView):
 
     Json Parameters:
         cid name host size ports image status
-        user_id command created hostname flavor_id
+        user_id command created hostname flavor_id json_extra
 
     Status Codes:
         201 - Success, no error, created
@@ -117,6 +118,7 @@ class ContainerCreateView(APIView):
                 "created": "1417874473",
                 "hostname": "bda51967884c",
                 "flavor_id": "1"
+                "json_extra": "",
             }
 
         Failure:
@@ -151,7 +153,7 @@ class ContainerUpdateView(APIView):
 
     Jons Parameters:
         cid name host size ports image status
-        user_id command created hostname flavor_id
+        user_id command created hostname flavor_id json_extra
 
     Status Codes:
         200 - Success, no error
@@ -238,7 +240,8 @@ class ContainerDetailView(APIView):
                 "command": "/bin/bash",
                 "created": "1417874473",
                 "hostname": "bda51967884c",
-                "flavor_id": "1"
+                "flavor_id": "1",
+                "json_extra": "",
             }
         Failure:
             {"detail": STRING}

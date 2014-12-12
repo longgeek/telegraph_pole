@@ -47,4 +47,5 @@ class ContainerSerializer(serializers.ModelSerializer):
                   'command',
                   'created',
                   'hostname',
-                  'flavor_id',)
+                  'flavor_id',
+                  'json_extra')

@@ -76,7 +76,7 @@ class Container(models.Model):
     ports = models.CharField(max_length=200, null=True, blank=True)
     hostname = models.CharField(max_length=80, null=True, blank=True)
     create_status = models.BooleanField(_("Create_Status"), default=False)
-    json_extra = models.TextField()
+    json_extra = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = "apphome"
