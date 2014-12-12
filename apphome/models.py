@@ -73,7 +73,7 @@ class Container(models.Model):
     command = models.CharField(max_length=200, null=True, blank=True)
     created = models.CharField(max_length=40, null=True, blank=True)
     status = models.CharField(max_length=40, null=True, blank=True)
-    ports = models.CharField(max_length=200, null=True, blank=True)
+    ports = models.CharField(max_length=400, null=True, blank=True)
     hostname = models.CharField(max_length=80, null=True, blank=True)
     create_status = models.BooleanField(_("Create_Status"), default=False)
     json_extra = models.TextField(null=True, blank=True)
