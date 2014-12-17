@@ -571,10 +571,11 @@ class ContainerConsoleView(APIView):
         POST /containers/3/console HTTP/1.1
 
         {
+         "username":"longgeek",
          "command":[
                      "/bin/bash",
                      "vim /path/urls.py",
-             ],
+             ]
         }
 
     Jons Parameters:
@@ -617,6 +618,161 @@ class ContainerConsoleView(APIView):
                        'command': param['command'],
                        'username': param['username'],
                        'message_type': 'console_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r, status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerFilesWriteView(APIView):
+    """为容器中的文件写入数据
+
+    Info:
+        POST /containers/(id)/files/write HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/files/write HTTP/1.1
+
+        {
+         "username":"longgeek",
+         "files":{
+            "/opt/python/django_project/urls.py": "file content",
+            "/opt/python/django_project/views.py": "file content",
+            }
+        }
+
+    Jons Parameters:
+        files: dict
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": "10",
+                "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
+                        b51b3cd139fc050860f362def2ed",
+                "host": "192.168.8.8",
+                "username": 'longgeek',
+                "files":{
+                   "/opt/python/django_project/urls.py": "file content",
+                   "/opt/python/django_project/views.py": "file content",
+                }
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'files' 'username'
+        # 并且 value 不能为空
+        if len(param) == 2 and 'files' in param.keys() and \
+                               'username' in param.keys():
+            if param['files'] and param['username']:
+                # for file_name in simplejson.loads(param['files']):
+                #     if file_name[0] != '/':
+                #         detail = {'detail': 'Error: The wrong parameter!'}
+                #         return Response(detail,
+                #                         status=status.HTTP_400_BAD_REQUEST)
+                msg = {'id': id,
+                       'files': param['files'],
+                       'username': param['username'],
+                       'message_type': 'files_write_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r, status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerFilesReadView(APIView):
+    """为容器中的文件写入数据
+
+    Info:
+        POST /containers/(id)/files/read HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/files/read HTTP/1.1
+
+        {
+         "files":[
+                     "/path/urls.py",
+                     "/path/views.py",
+             ],
+        }
+
+    Jons Parameters:
+        files: list
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": "10",
+                "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
+                        b51b3cd139fc050860f362def2ed",
+                "host": "192.168.8.8",
+                "username": 'longgeek',
+                "files": {
+                    "/opt/python/django_project/urls.py": "file content",
+                    "/opt/python/django_project/views.py": "file content",
+                },
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'files' ’username'
+        # 并且 value 不能为空
+        if len(param) == 2 and 'files' in param.keys() and \
+                               'username' in param.keys():
+            if param['files'] and param['username']:
+                # for file_name in param['files']:
+                #     if file_name[0] != '/':
+                #         detail = {'detail': 'Error: The wrong parameter!'}
+                #         return Response(detail,
+                #                         status=status.HTTP_400_BAD_REQUEST)
+                msg = {'id': id,
+                       'files': param['files'],
+                       'username': param['username'],
+                       'message_type': 'files_read_container'}
                 s, m, r = send_message(msg)
                 if s == 0:
                     return Response(r, status=status.HTTP_200_OK)

@@ -47,4 +47,10 @@ urlpatterns = patterns(
 
     url(r'^(?P<id>[0-9]+)/console$',
         views.ContainerConsoleView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/files/write$',
+        views.ContainerFilesWriteView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/files/read$',
+        views.ContainerFilesReadView.as_view()),
 )
