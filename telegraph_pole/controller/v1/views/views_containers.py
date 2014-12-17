@@ -2,16 +2,23 @@
 # -*- coding: utf-8 -*-
 # Author: Longgeek <longgeek@gmail.com>
 
+import redis
+import hashlib
+import simplejson
+
 from django.http import Http404
-
 from apphome.models import Container
-
 from serializers import ContainerSerializer
 
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from telegraph_pole.lib.mq import send_message
+
+from telegraph_pole.settings import REDIS_DB
+from telegraph_pole.settings import REDIS_HOST
+from telegraph_pole.settings import REDIS_PORT
+from telegraph_pole.settings import CONSOLE_DOMAIN
 
 
 class ContainerView(APIView):
@@ -784,6 +791,90 @@ class ContainerFilesReadView(APIView):
                 detail = {'detail': 'Error: The wrong parameter!'}
                 return Response(detail,
                                 status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerConsoleUrlView(APIView):
+    """从 redis 中获取 bash ipython vim Console url.
+
+    Info:
+        POST /containers/(id)/console/url HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/console/url HTTP/1.1
+
+        {
+         "username":"longgeek",
+         "command":[
+                     "/bin/bash",
+                     "vim /path/urls.py",
+             ]
+        }
+
+    Jons Parameters:
+        command: list
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "/bin/bash": "51d962f4446e125073234337.console.coderpie.com"
+                "vim /opt/views.py": "51d962f4446e125073234337\
+                        .console.coderpie.com"
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'command' ’username'
+        # 并且 value 不能为空
+        if len(param) == 2 and 'command' in param.keys() and \
+                               'username' in param.keys():
+            if not param['command'] or not param['username']:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+            try:
+                # 根据 cid username command 生成 hash
+                cid = Container.objects.get(id=id).cid
+                username = param['username']
+                command_list = simplejson.loads(param['command'])
+
+                # 连接到 Redis 数据库
+                conn = redis.Redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+                # 定义返回数据
+                results = {}
+
+                # 遍历多条命令, 生成 hash
+                for command in command_list:
+                    hash_key = hashlib.md5(username +
+                                           cid +
+                                           command).hexdigest()
+                    # 根据 hash 值从 Redis 获取 Value
+                    full_hash_key = cid[:12] + hash_key[:12]
+                    console_url = conn.get(full_hash_key)
+                    if console_url:
+                        console_url = full_hash_key + CONSOLE_DOMAIN
+
+                    results[command] = console_url
+                return Response(results, status=status.HTTP_200_OK)
+
+            except Exception, e:
+                return Response({'detail': str(e)},
+                                status=status.HTTP_404_NOT_FOUND)
         else:
             detail = {'detail': 'Error: The wrong parameter!'}
             return Response(detail,

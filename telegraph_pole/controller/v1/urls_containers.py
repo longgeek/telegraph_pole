@@ -53,4 +53,7 @@ urlpatterns = patterns(
 
     url(r'^(?P<id>[0-9]+)/files/read$',
         views.ContainerFilesReadView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/console/url$',
+        views.ContainerConsoleUrlView.as_view()),
 )

@@ -106,3 +106,13 @@ RABBITMQ_URLS = 'amqp://%s:%s@%s:%s//' % (RABBITMQ_USER,
                                           RABBITMQ_PASS,
                                           RABBITMQ_HOST,
                                           RABBITMQ_PORT)
+
+# Redis Server Setup
+
+REDIS_DB = '0'
+REDIS_PORT = '6379'
+REDIS_HOST = '192.168.8.8'
+
+# Container console domain
+
+CONSOLE_DOMAIN = '.console.coderpie.com'
