@@ -98,7 +98,7 @@ REST_FRAMEWORK = {
 
 # RabbitMQ Server Setup
 
-RABBITMQ_HOST = '192.168.8.8'
+RABBITMQ_HOST = '127.0.0.1'
 RABBITMQ_PORT = '5672'
 RABBITMQ_USER = 'guest'
 RABBITMQ_PASS = 'guest'
@@ -111,7 +111,7 @@ RABBITMQ_URLS = 'amqp://%s:%s@%s:%s//' % (RABBITMQ_USER,
 
 REDIS_DB = '0'
 REDIS_PORT = '6379'
-REDIS_HOST = '192.168.8.8'
+REDIS_HOST = '127.0.0.1'
 
 # Container console domain
 
