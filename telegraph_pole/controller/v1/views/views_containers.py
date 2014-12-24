@@ -144,7 +144,7 @@ class ContainerCreateView(APIView):
                 return Response(detail,
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors,
+            return Response({'detail': str(serializer.errors)},
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -180,7 +180,8 @@ class ContainerUpdateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': str(serializer.errors)},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContainerDeleteView(APIView):
