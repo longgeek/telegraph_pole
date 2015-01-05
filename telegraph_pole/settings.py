@@ -1,3 +1,14 @@
+# -*- coding:utf-8 -*-
+
+import logging
+
+try:
+    from local.local_settings import *
+except ImportError:
+    logging.error("No local_settings file found in telegraph_pole/local/local_settings.py")
+    exit()
+
+
 """
 Django settings for telegraph_pole project.
 
@@ -18,13 +29,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '6vv0xbhmm(02ru1t*ztb-499^gnn_nrwc-is1^sv#j%ki*c9cw'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-TEMPLATE_DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -56,19 +60,6 @@ ROOT_URLCONF = 'telegraph_pole.urls'
 WSGI_APPLICATION = 'telegraph_pole.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'telegraph_pole',
-        'HOST': '127.0.0.1',
-        'USER': 'root',
-        'PASSWORD': '',
-    }
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
@@ -95,20 +86,3 @@ REST_FRAMEWORK = {
     #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     # ]
 }
-
-# RabbitMQ Server Setup
-
-RABBITMQ_HOST = '127.0.0.1'
-RABBITMQ_PORT = '5672'
-RABBITMQ_USER = 'guest'
-RABBITMQ_PASS = 'guest'
-RABBITMQ_URLS = 'amqp://%s:%s@%s:%s//' % (RABBITMQ_USER,
-                                          RABBITMQ_PASS,
-                                          RABBITMQ_HOST,
-                                          RABBITMQ_PORT)
-
-# Redis Server Setup
-
-REDIS_DB = '0'
-REDIS_PORT = '6379'
-REDIS_HOST = '127.0.0.1'

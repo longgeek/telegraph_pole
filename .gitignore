@@ -13,3 +13,4 @@ reports/
 .environment_version
 .venv
 db.sqlite3
+local_settings.py
