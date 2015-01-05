@@ -18,7 +18,6 @@ from telegraph_pole.lib.mq import send_message
 from telegraph_pole.settings import REDIS_DB
 from telegraph_pole.settings import REDIS_HOST
 from telegraph_pole.settings import REDIS_PORT
-from telegraph_pole.settings import CONSOLE_DOMAIN
 
 
 class ContainerView(APIView):
@@ -57,7 +56,7 @@ class ContainerView(APIView):
                     "ports": "",
                     "status": "Up 36 minutes",
                     "user_id": "2",
-                    "command": "/bin/bash",
+                    "command": "bash",
                     "created": "1417874473",
                     "hostname": "bda51967884c",
                     "flavor_id": "1",
@@ -121,7 +120,7 @@ class ContainerCreateView(APIView):
                 "ports": "",
                 "status": "Up 41 minutes",
                 "user_id": "2",
-                "command": "/bin/bash",
+                "command": "bash",
                 "created": "1417874473",
                 "hostname": "bda51967884c",
                 "flavor_id": "1"
@@ -245,7 +244,7 @@ class ContainerDetailView(APIView):
                 "ports": "",
                 "status": "Up 6 minutes",
                 "user_id": "2",
-                "command": "/bin/bash",
+                "command": "bash",
                 "created": "1417874473",
                 "hostname": "bda51967884c",
                 "flavor_id": "1",
@@ -581,7 +580,7 @@ class ContainerConsoleView(APIView):
         {
          "username":"longgeek",
          "command":[
-                     "/bin/bash",
+                     "bash",
                      "vim /path/urls.py",
              ]
         }
@@ -604,7 +603,9 @@ class ContainerConsoleView(APIView):
                 "host": "192.168.8.8",
                 "username": 'longgeek',
                 "console": {
-                    "/bin/bash": {
+                    "bash": {
+                        "url": "http://1b37f57f3bd3151917edca3d
+                                .console.lirong.com"
                         "private_port": 4301,
                         "public_port": 49187
                     }
@@ -811,7 +812,7 @@ class ContainerConsoleUrlView(APIView):
         {
          "username":"longgeek",
          "command":[
-                     "/bin/bash",
+                     "bash",
                      "vim /path/urls.py",
              ]
         }
@@ -828,7 +829,7 @@ class ContainerConsoleUrlView(APIView):
     Results: JSON
         Success:
             {
-                "/bin/bash": "51d962f4446e125073234337.console.coderpie.com"
+                "bash": "51d962f4446e125073234337.console.coderpie.com"
                 "vim /opt/views.py": "51d962f4446e125073234337\
                         .console.coderpie.com"
             }
@@ -867,9 +868,6 @@ class ContainerConsoleUrlView(APIView):
                     # 根据 hash 值从 Redis 获取 Value
                     full_hash_key = cid[:12] + hash_key[:12]
                     console_url = conn.get(full_hash_key)
-                    if console_url:
-                        console_url = full_hash_key + CONSOLE_DOMAIN
-
                     results[command] = console_url
                 return Response(results, status=status.HTTP_200_OK)
 
