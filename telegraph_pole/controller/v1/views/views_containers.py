@@ -169,7 +169,10 @@ class ContainerUpdateView(APIView):
 
     def get_object(self, id):
         try:
-            return Container.objects.get(id=id)
+            c_info = Container.objects.get(id=id)
+            if c_info.cid and c_info.create_status == 0:
+                raise Http404
+            return c_info
         except Container.DoesNotExist:
             raise Http404
 
@@ -256,7 +259,10 @@ class ContainerDetailView(APIView):
 
     def get_object(self, id):
         try:
-            return Container.objects.get(id=id)
+            c_info = Container.objects.get(id=id)
+            if c_info.cid and c_info.create_status == 0:
+                raise Http404
+            return c_info
         except Container.DoesNotExist:
             raise Http404
 
