@@ -333,10 +333,20 @@ class ContainerStartView(APIView):
             {"detail": STRING}
     """
 
+    def get_object(self, id):
+        try:
+            c_info = Container.objects.get(id=id)
+            if not c_info.cid or c_info.create_status == 0:
+                raise Http404
+        except Container.DoesNotExist:
+            raise Http404
+
     def post(self, request, id, format=None):
         if request.POST:
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
+
+        self.get_object(id)
         msg = {'id': id, 'message_type': 'start_container'}
         s, m, r = send_message(msg)
         if s == 0:
