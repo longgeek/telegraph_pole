@@ -135,6 +135,7 @@ class ContainerCreateView(APIView):
         serializer = ContainerSerializer(data=request.DATA)
         if serializer.is_valid():
             serializer.data['message_type'] = 'create_container'
+            serializer.data['username'] = request.DATA['username']
             s, m, r = send_message(serializer.data)
             if s == 0:
                 return Response(r, status=status.HTTP_201_CREATED)
@@ -346,8 +347,11 @@ class ContainerStartView(APIView):
             return Response('Error: Do not need any parameters!',
                             status=status.HTTP_400_BAD_REQUEST)
 
+        param = request.DATA
         self.get_object(id)
-        msg = {'id': id, 'message_type': 'start_container'}
+        msg = {'id': id,
+               'username': param['username'],
+               'message_type': 'start_container'}
         s, m, r = send_message(msg)
         if s == 0:
             detail = {'detail': 'Container %s startup success.' % r['cid']}
