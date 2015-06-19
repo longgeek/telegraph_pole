@@ -1,13 +1,12 @@
 from django.conf.urls import patterns
 from django.conf.urls import url
-
 from rest_framework import routers
+from views import views_hosts as views
 
 # from rest_framework.urlpatterns import format_suffix_patterns
 from django.contrib import admin
 admin.autodiscover()
 
-from views import views_hosts as views
 
 router = routers.DefaultRouter()
 

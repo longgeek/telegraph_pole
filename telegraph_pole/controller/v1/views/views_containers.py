@@ -273,6 +273,75 @@ class ContainerDetailView(APIView):
         return Response(serializer.data)
 
 
+class ContainerInspectView(APIView):
+    """根据容器 id 获取容器的详细信息
+
+    Info:
+        GET /containers/(id)/inspect HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        GET /containers/3/inspect HTTP/1.1
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success (all keys):
+            {
+                'State',
+                 'Id',
+                 'Config',
+                 'HostsPath',
+                 'Args',
+                 'Driver',
+                 'ExecDriver',
+                 'Path',
+                 'HostnamePath',
+                 'VolumesRW',
+                 'RestartCount',
+                 'Name',
+                 'Created',
+                 'Volumes',
+                 'ExecIDs',
+                 'ProcessLabel',
+                 'NetworkSettings',
+                 'AppArmorProfile',
+                 'Image',
+                 'LogPath',
+                 'HostConfig',
+                 'MountLabel',
+                 'ResolvConfPath'
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def get_object(self, id):
+        try:
+            c_info = Container.objects.get(id=id)
+            if c_info.cid and c_info.create_status == 0:
+                raise Http404
+            return c_info
+        except Container.DoesNotExist:
+            raise Http404
+
+    def get(self, request, id, format=None):
+        cid = self.get_object(id)
+        msg = {'id': id,
+               'cid': cid.cid,
+               'message_type': 'inspect_container'}
+        s, m, r = send_message(msg)
+        if s == 0:
+            return Response(r['container_info'], status=status.HTTP_200_OK)
+        else:
+            detail = {'detail': m}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
 class ContainerStopView(APIView):
     """停止一个容器
 
@@ -412,6 +481,7 @@ class ContainerExecView(APIView):
                      "date",
                      "date -s"
              ],
+         "wait": False
         }
 
     Jons Parameters:
@@ -434,13 +504,20 @@ class ContainerExecView(APIView):
 
         # 判断 post 的参数是否有 'command'
         # 并且 value 不能为空
-        if len(param) == 1 and 'command' in param.keys():
+        if 'command' in param.keys():
             if param['command']:
-                msg = {'id': id, 'command': param['command'],
+                msg = {'id': id,
+                       'command': param['command'],
+                       'wait': param['wait'],
                        'message_type': 'exec_container'}
+
                 s, m, r = send_message(msg)
                 if s == 0:
-                    detail = {'detail': 'Container %s command \
+                    if "django_project_info" in msg.keys() and \
+                       msg["django_project_info"]:
+                        detail = {'detail': r}
+                    else:
+                        detail = {'detail': 'Container %s command \
 executed successfully' % r['cid']}
                     return Response(detail, status=status.HTTP_200_OK)
                 else:
@@ -819,6 +896,62 @@ class ContainerFilesReadView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+class ContainerFilesDeleteView(APIView):
+    """删除容器中的文件
+
+    Info:
+        DELETE /containers/(id)/files/delete HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        DELETE /containers/3/files/delete HTTP/1.1
+
+        {
+         "files":[
+                     "/path/urls.py",
+                     "/path/views.py",
+             ],
+        }
+
+    Jons Parameters:
+        files: list
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "/opt/python/django_project/urls.py": "does not exist",
+                "/opt/python/django_project/views.py": "deleted",
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def delete(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'files', 并且 value 不能为空
+        if len(param) == 1 and 'files' in param.keys() and param['files']:
+            msg = {'id': id,
+                   'files': param['files'],
+                   'message_type': 'files_delete_container'}
+            s, m, r = send_message(msg)
+            if s == 0:
+                return Response(r['files'], status=status.HTTP_200_OK)
+            else:
+                detail = {'detail': m}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
 class ContainerConsoleUrlView(APIView):
     """从 redis 中获取 bash ipython vim Console url.
 
@@ -898,3 +1031,117 @@ class ContainerConsoleUrlView(APIView):
             detail = {'detail': 'Error: The wrong parameter!'}
             return Response(detail,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerDirsCreateView(APIView):
+    """为容器创建一个或多个目录
+
+    Info:
+        POST /containers/(id)/dirs/create HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/dirs/create HTTP/1.1
+
+        {"dirs": ["/tmp/dir1", "/tmp/dir2"]}
+
+    Jons Parameters:
+        dirs: list
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "/tmp/dir1": "exist",
+                "/tmp/dir2": "created"
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+        try:
+            if len(param) == 1 and 'dirs' in param.keys():
+                if type(param.get('dirs')) is not list:
+                    detail = {'detail': 'Error: Value must be a list!'}
+                    return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+                cid = Container.objects.get(id=id).cid
+                msg = {'id': id,
+                       'cid': cid,
+                       'dirs': param.get('dirs'),
+                       'message_type': 'dirs_create_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r['dirs'], status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerDirsDeleteView(APIView):
+    """删除容器中一个或多个目录
+
+    Info:
+        DELETE /containers/(id)/dirs/delete HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        DELETE /containers/3/dirs/delete HTTP/1.1
+
+        {"dirs": ["/tmp/dir1", "/tmp/dir2"]}
+
+    Jons Parameters:
+        dirs: list
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "/tmp/dir1": "does not exist",
+                "/tmp/dir2": "deleted"
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def delete(self, request, id, format=None):
+        param = request.DATA
+        try:
+            if len(param) == 1 and 'dirs' in param.keys():
+                if type(param.get('dirs')) is not list:
+                    detail = {'detail': 'Error: Value must be a list!'}
+                    return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+                cid = Container.objects.get(id=id).cid
+                msg = {'id': id,
+                       'cid': cid,
+                       'dirs': param.get('dirs'),
+                       'message_type': 'dirs_delete_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r['dirs'], status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail, status=status.HTTP_400_BAD_REQUEST)

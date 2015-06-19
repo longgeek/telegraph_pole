@@ -24,6 +24,9 @@ urlpatterns = patterns(
     url(r'^(?P<id>[0-9]+)/delete$',
         views.ContainerDeleteView.as_view()),
 
+    url(r'^(?P<id>[0-9]+)/inspect$',
+        views.ContainerInspectView.as_view()),
+
     url(r'^(?P<id>[0-9]+)/stop$',
         views.ContainerStopView.as_view()),
 
@@ -54,6 +57,15 @@ urlpatterns = patterns(
     url(r'^(?P<id>[0-9]+)/files/read$',
         views.ContainerFilesReadView.as_view()),
 
+    url(r'^(?P<id>[0-9]+)/files/delete$',
+        views.ContainerFilesDeleteView.as_view()),
+
     url(r'^(?P<id>[0-9]+)/console/url$',
         views.ContainerConsoleUrlView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/dirs/create$',
+        views.ContainerDirsCreateView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/dirs/delete',
+        views.ContainerDirsDeleteView.as_view()),
 )
