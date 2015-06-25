@@ -819,6 +819,70 @@ class ContainerFilesWriteView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+class ContainerFilesListView(APIView):
+    """列出文件中的文件
+
+    Info:
+        GET /containers/(id)/files/list HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        GET /containers/3/files/list HTTP/1.1
+
+        {
+         "dirs":[
+                     "/tmp/path",
+             ],
+        }
+
+    Jons Parameters:
+        files: list
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "/tmp/path": [
+                      {"type":"directory","name":"/tmp/path/","contents":[
+                        {"type":"directory","name":"dir_A","contents":[
+                        ]},
+                        {"type":"directory","name":"dir_B","contents":[
+                        ]},
+                        {"type":"file","name":"file1.txt"}
+                      ]},
+                      {"type":"report","directories":2,"files":1}
+                    ],
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def get(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 get 的参数是否有 'dirs', 并且 value 不能为空
+        if len(param) == 1 and 'dirs' in param.keys() and param['dirs']:
+            msg = {'id': id,
+                   'dirs': param['dirs'],
+                   'message_type': 'files_list_container'}
+            s, m, r = send_message(msg)
+            if s == 0:
+                return Response(r['dirs'], status=status.HTTP_200_OK)
+            else:
+                detail = {'detail': m}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
 class ContainerFilesReadView(APIView):
     """为容器中的文件写入数据
 
@@ -865,16 +929,11 @@ class ContainerFilesReadView(APIView):
     def post(self, request, id, format=None):
         param = request.DATA
 
-        # 判断 post 的参数是否有 'files' ’username'
+        # 判断 post 的参数是否有 'files' 'username'
         # 并且 value 不能为空
         if len(param) == 2 and 'files' in param.keys() and \
                                'username' in param.keys():
             if param['files'] and param['username']:
-                # for file_name in param['files']:
-                #     if file_name[0] != '/':
-                #         detail = {'detail': 'Error: The wrong parameter!'}
-                #         return Response(detail,
-                #                         status=status.HTTP_400_BAD_REQUEST)
                 msg = {'id': id,
                        'files': param['files'],
                        'username': param['username'],
