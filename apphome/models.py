@@ -68,7 +68,7 @@ class Container(models.Model):
     size = models.CharField(max_length=40, null=True, blank=True)
     flavor_id = models.CharField(max_length=20)
     image = models.ForeignKey(Image)
-    user_id = models.CharField(max_length=25)
+    user_id = models.CharField(max_length=36)
     host = models.ForeignKey(Host, null=True, blank=True)
     name = models.CharField(max_length=80, null=True, blank=True)
     command = models.CharField(max_length=200, null=True, blank=True)
