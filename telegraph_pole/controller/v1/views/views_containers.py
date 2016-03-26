@@ -1204,3 +1204,149 @@ class ContainerDirsDeleteView(APIView):
         except:
             detail = {'detail': 'Error: The wrong parameter!'}
             return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerHostExecView(APIView):
+    """在 Docker 主机上执行命令
+
+    Info:
+        POST /containers/(id)/host/exec HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/host/exec HTTP/1.1
+
+        {
+         "username": "longgeek",
+         "commands": [
+            "cd /opt",
+            "ls /",
+            ]
+        }
+
+    Jons Parameters:
+        commands: list
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": "10",
+                "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
+                        b51b3cd139fc050860f362def2ed",
+                "host": "192.168.8.8",
+                "username": 'longgeek',
+                "commands": {
+                }
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'commands' 'username'
+        # 并且 value 不能为空
+        if len(param) == 2 and 'commands' in param.keys() and \
+                               'username' in param.keys():
+            if param['commands'] and param['username']:
+                msg = {'id': id,
+                       'commands': param['commands'],
+                       'username': param['username'],
+                       'message_type': 'host_exec_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r, status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContainerHostFDCheckView(APIView):
+    """在 Docker 主机上执行命令
+       检测文件, 目录是否创建
+
+    Info:
+        POST /containers/(id)/host/fdcheck HTTP/1.1
+        Content-Type: application/json
+
+    Example request:
+        POST /containers/3/host/fdcheck HTTP/1.1
+
+        {
+            "username": "longgeek",
+            "fds": [
+                {
+                    "type": "file",
+                    "name": "/tmp/test.py",
+                }
+            ]
+        }
+
+    Jons Parameters:
+        fds: list
+        username: str
+
+    Status Codes:
+        200 - Success, no error
+        400 - Failure, bad request
+        500 - Failure, server error
+
+    Results: JSON
+        Success:
+            {
+                "id": "10",
+                "cid": "779bfb2bebb079ae80f7686c642cb83df9ae
+                        b51b3cd139fc050860f362def2ed",
+                "host": "192.168.8.8",
+                "username": 'longgeek',
+                "fds": {
+                    "/tmp/test.py": False
+                }
+            }
+        Failure:
+            {"detail": STRING}
+    """
+
+    def post(self, request, id, format=None):
+        param = request.DATA
+
+        # 判断 post 的参数是否有 'fds' 'username'
+        # 并且 value 不能为空
+        if len(param) == 2 and 'fds' in param.keys() and \
+                               'username' in param.keys():
+            if param['fds'] and param['username']:
+                msg = {'id': id,
+                       'fds': param['fds'],
+                       'username': param['username'],
+                       'message_type': 'host_fdcheck_container'}
+                s, m, r = send_message(msg)
+                if s == 0:
+                    return Response(r, status=status.HTTP_200_OK)
+                else:
+                    detail = {'detail': m}
+                    return Response(detail,
+                                    status=status.HTTP_400_BAD_REQUEST)
+            else:
+                detail = {'detail': 'Error: The wrong parameter!'}
+                return Response(detail,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            detail = {'detail': 'Error: The wrong parameter!'}
+            return Response(detail,
+                            status=status.HTTP_400_BAD_REQUEST)

@@ -71,4 +71,10 @@ urlpatterns = patterns(
 
     url(r'^(?P<id>[0-9]+)/dirs/delete',
         views.ContainerDirsDeleteView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/host/exec$',
+        views.ContainerHostExecView.as_view()),
+
+    url(r'^(?P<id>[0-9]+)/host/fdcheck$',
+        views.ContainerHostFDCheckView.as_view()),
 )
