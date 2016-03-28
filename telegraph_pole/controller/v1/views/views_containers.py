@@ -1337,7 +1337,7 @@ class ContainerHostFDCheckView(APIView):
                        'message_type': 'host_fdcheck_container'}
                 s, m, r = send_message(msg)
                 if s == 0:
-                    return Response(r, status=status.HTTP_200_OK)
+                    return Response(r['fds'], status=status.HTTP_200_OK)
                 else:
                     detail = {'detail': m}
                     return Response(detail,
