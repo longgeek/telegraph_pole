@@ -427,7 +427,7 @@ class ContainerStartView(APIView):
             return Response(detail, status=status.HTTP_200_OK)
         else:
             detail = {'detail': m}
-            return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+            return Response(detail, status=status.HTTP_404_NOT_FOUND)
 
 
 class ContainerReStartView(APIView):
